@@ -1,11 +1,10 @@
 {
   "functions": {
-    "api/*.php": {
-      "runtime": "vercel-php@0.6.0"
-    },
-    "*.php": {
-      "runtime": "vercel-php@0.6.0"
-    }
+    "api/ai_assistant.php": { "runtime": "vercel-php@0.6.0" },
+    "api/analyze_reviews.php": { "runtime": "vercel-php@0.6.0" },
+    "api/generate_description.php": { "runtime": "vercel-php@0.6.0" },
+    "api/semantic_search.php": { "runtime": "vercel-php@0.6.0" },
+    "index.php": { "runtime": "vercel-php@0.6.0" }
   },
   "routes": [
     {
