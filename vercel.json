@@ -1,13 +1,13 @@
 {
   "functions": {
     "api/*.php": {
-      "runtime": "php@8.2"
+      "runtime": "vercel-php@0.6.0"
     },
     "admin/*.php": {
-      "runtime": "php@8.2"
+      "runtime": "vercel-php@0.6.0"
     },
-    "*.php": {
-      "runtime": "php@8.2"
+    "index.php": {
+      "runtime": "vercel-php@0.6.0"
     }
   },
   "routes": [
