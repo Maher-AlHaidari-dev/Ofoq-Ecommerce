@@ -17,16 +17,22 @@ try {
 
     $apiKey = $_ENV['GEMINI_API_KEY'] ?? $_SERVER['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? '';
 
-    // إذا لم يجد المفتاح يُنفذ البحث التقليدي مباشرة
+    // جلب جميع منتجات الجدول لتفادي خطأ أسماء الأعمدة غير الموجودة
+    $stmt = $pdo->query("SELECT * FROM products");
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (empty($products)) {
+        echo json_encode(['products' => []]);
+        exit;
+    }
+
+    // إذا لم يتوفر مفتاح API نستخدم البحث التقليدي
     if (empty($apiKey) || $apiKey === "YOUR_GEMINI_API_KEY") {
         $stmtS = $pdo->prepare("SELECT * FROM products WHERE name LIKE ? OR description LIKE ?");
         $stmtS->execute(["%$query%", "%$query%"]);
         echo json_encode(['products' => $stmtS->fetchAll(PDO::FETCH_ASSOC)]);
         exit;
     }
-
-    $stmt = $pdo->query("SELECT id, name, description, price, category, image FROM products");
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
     $prompt = "لدينا قائمة بالمنتجات التالية بصيغة JSON:\n" . json_encode($products, JSON_UNESCAPED_UNICODE) . "\n\nالمستخدم يبحث عن: '{$query}'.\nاختر المنتجات المناسبة وأرجع أرقام الـ ID الخاصة بها فقط مفصولة بأرقام مثل: 1, 2, 3. إذا لم تجد أي منتج أرجع الرقم 0 فقط.";
@@ -56,7 +62,7 @@ try {
         $st->execute(array_values($ids));
         echo json_encode(['products' => $st->fetchAll(PDO::FETCH_ASSOC)]);
     } else {
-        // إذا لم يُرجع AI نتائج، نستخدم البحث التقليدي بدلاً من إرجاع شاشة فارغة
+        // Fallback للبحث العادي إذا لم يُرجع AI ناتجة
         $stmtS = $pdo->prepare("SELECT * FROM products WHERE name LIKE ? OR description LIKE ?");
         $stmtS->execute(["%$query%", "%$query%"]);
         echo json_encode(['products' => $stmtS->fetchAll(PDO::FETCH_ASSOC)]);
