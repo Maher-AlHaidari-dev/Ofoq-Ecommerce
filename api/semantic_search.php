@@ -5,7 +5,6 @@ ini_set('display_errors', 0);
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // تحديد المسار المطلق لتفادي خطأ المسارات في Vercel
     require_once __DIR__ . '/../config/db.php';
 
     $input = json_decode(file_get_contents('php://input'), true);
@@ -18,6 +17,7 @@ try {
 
     $apiKey = $_ENV['GEMINI_API_KEY'] ?? $_SERVER['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? '';
 
+    // إذا لم يجد المفتاح يُنفذ البحث التقليدي مباشرة
     if (empty($apiKey) || $apiKey === "YOUR_GEMINI_API_KEY") {
         $stmtS = $pdo->prepare("SELECT * FROM products WHERE name LIKE ? OR description LIKE ?");
         $stmtS->execute(["%$query%", "%$query%"]);
@@ -29,7 +29,7 @@ try {
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
-    $prompt = "لديك منتجات: " . json_encode($products, JSON_UNESCAPED_UNICODE) . "\nالعميل يبحث عن: '{$query}'. أرجع فقط أرقام الـ ID المطابقة مفصولة بفواصل مثل: 1,2 بدون أي كلام إضافي.";
+    $prompt = "لدينا قائمة بالمنتجات التالية بصيغة JSON:\n" . json_encode($products, JSON_UNESCAPED_UNICODE) . "\n\nالمستخدم يبحث عن: '{$query}'.\nاختر المنتجات المناسبة وأرجع أرقام الـ ID الخاصة بها فقط مفصولة بأرقام مثل: 1, 2, 3. إذا لم تجد أي منتج أرجع الرقم 0 فقط.";
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
@@ -44,16 +44,22 @@ try {
 
     $data = json_decode($res, true);
     $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+    
     preg_match_all('/\d+/', $text, $matches);
-    $ids = array_map('intval', $matches[0] ?? []);
+    $ids = array_filter(array_map('intval', $matches[0] ?? []), function($id) {
+        return $id > 0;
+    });
 
     if (!empty($ids)) {
         $in = implode(',', array_fill(0, count($ids), '?'));
         $st = $pdo->prepare("SELECT * FROM products WHERE id IN ($in)");
-        $st->execute($ids);
+        $st->execute(array_values($ids));
         echo json_encode(['products' => $st->fetchAll(PDO::FETCH_ASSOC)]);
     } else {
-        echo json_encode(['products' => []]);
+        // إذا لم يُرجع AI نتائج، نستخدم البحث التقليدي بدلاً من إرجاع شاشة فارغة
+        $stmtS = $pdo->prepare("SELECT * FROM products WHERE name LIKE ? OR description LIKE ?");
+        $stmtS->execute(["%$query%", "%$query%"]);
+        echo json_encode(['products' => $stmtS->fetchAll(PDO::FETCH_ASSOC)]);
     }
 
 } catch (Exception $e) {
