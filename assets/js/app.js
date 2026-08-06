@@ -1,55 +1,66 @@
-async function performSearch() {
-    const searchInput = document.getElementById('search-input');
-    if (!searchInput) return;
+let cart = [];
 
-    const searchQuery = searchInput.value.trim();
-    if (!searchQuery) return;
+function addToCart(id, name, price) {
+    cart.push({ id, name, price });
+    updateCartUI();
+    alert('تمت الإضافة للسلة!');
+}
+
+function updateCartUI() {
+    const cartCountEl = document.getElementById('cart-count');
+    if (cartCountEl) cartCountEl.innerText = cart.length;
+
+    const list = document.getElementById('cart-items-list');
+    const totalEl = document.getElementById('cart-total-price');
+    const cartDataInput = document.getElementById('cart-data-input');
+
+    let total = 0;
+    if (list) {
+        list.innerHTML = '';
+        cart.forEach(i => {
+            total += Number(i.price);
+            list.innerHTML += `<div class="flex justify-between py-1"><span>${i.name}</span><span class="text-green-400">$${i.price}</span></div>`;
+        });
+    }
+
+    if (totalEl) totalEl.innerText = `$${total.toFixed(2)}`;
+    if (cartDataInput) cartDataInput.value = JSON.stringify(cart);
+}
+
+function openCheckoutModal() {
+    if (cart.length === 0) return alert('السلة فارغة!');
+    const modal = document.getElementById('checkout-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeCheckoutModal() {
+    const modal = document.getElementById('checkout-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function performSmartSearch() {
+    const searchInput = document.getElementById('smart-search-input');
+    if (!searchInput) return;
+    
+    const query = searchInput.value;
+    if (!query) return;
 
     try {
-        const response = await fetch('api/semantic_search.php', {
+        const res = await fetch('api/semantic_search.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: searchQuery })
+            body: JSON.stringify({ query })
         });
+        const data = await res.json();
+        const grid = document.getElementById('products-grid');
 
-        const data = await response.json();
-        const productsGrid = document.getElementById('products-grid');
-        
-        if (!productsGrid) return;
-
-        // التحقق من وجود منتجات راجعة
-        if (!data.products || data.products.length === 0) {
-            productsGrid.innerHTML = `
-                <div class="col-span-full text-center py-12">
-                    <p class="text-xl text-slate-400">عذراً، لم نجد أي منتجات تطابق "${searchQuery}"</p>
-                </div>`;
-            return;
+        if (grid && data.products) {
+            grid.innerHTML = '';
+            data.products.forEach(p => {
+                grid.innerHTML += `<div class="glass rounded-3xl overflow-hidden p-6"><img src="${p.image_url}" class="w-full h-48 object-cover rounded-xl mb-4"><h3 class="text-xl font-bold">${p.name}</h3></div>`;
+            });
         }
-
-        // إعادة رسم الكروت بالمنتجات المطابقة للبحث فقط
-        productsGrid.innerHTML = data.products.map(product => `
-            <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg flex flex-col justify-between">
-                <img src="${product.image_url || product.image || 'https://via.placeholder.com/300'}" alt="${product.name}" class="w-full h-48 object-cover">
-                <div class="p-5 flex-1 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-lg font-bold text-white mb-2">${product.name}</h3>
-                        <p class="text-slate-400 text-sm mb-4">${product.description || ''}</p>
-                    </div>
-                    <div class="flex items-center justify-between mt-auto">
-                        <span class="text-xl font-bold text-indigo-400">$${product.price}</span>
-                        <button onclick="addToCart(${product.id}, '${product.name}', ${product.price})" 
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition">
-                            إضافة للسلة
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        // التمرير التلقائي للنتائج
-        productsGrid.scrollIntoView({ behavior: 'smooth' });
-
-    } catch (error) {
-        console.error("خطأ في البحث:", error);
+    } catch (err) {
+        console.error('Error in smart search:', err);
     }
 }
