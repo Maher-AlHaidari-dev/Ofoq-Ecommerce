@@ -93,7 +93,7 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
     
 
         <script>
-        <script src="assets/js/app.js"></script>
+        
      </script>
  </body>
 </html>
