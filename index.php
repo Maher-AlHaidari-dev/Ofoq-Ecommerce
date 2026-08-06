@@ -13,20 +13,22 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
  </head>
  <body class="bg-[#0b0a1d] text-slate-100 min-h-screen flex flex-col justify-between">
      <header class="sticky top-0 z-40 glass border-b border-slate-800">
-        <div class="container mx-auto px-6 py-4 flex items-center justify-between gap-6">
-            <a href="index.php" class="text-2xl font-black text-indigo-400"><i class="fa-solid fa-gem"></i> أُفُق</a>
-            <div class="flex-1 max-w-lg relative hidden md:block">
-                <input type="text" id="smart-search-input" placeholder="بحث ذكي بالذكاء الاصطناعي..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-4 py-2 text-sm text-white focus:outline-none">
-                <button onclick="performSmartSearch()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-indigo-600 px-3 py-1 rounded-xl text-xs font-bold">بحث</button>
-            </div>
-            <div class="flex items-center gap-4">
-                <a href="track_order.php" class="text-xs bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-700">تتبع الطلب</a>
-                <button onclick="openCheckoutModal()" class="bg-indigo-600 px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-bag-shopping"></i> السلة <span id="cart-count" class="bg-white text-indigo-950 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
-                </button>
-            </div>
+    <div class="container mx-auto px-6 py-4 flex items-center justify-between gap-6">
+        <a href="index.php" class="text-2xl font-bold text-indigo-400"><i class="fa-solid fa-gem"></i> أُفق</a>
+        
+        <div class="flex-1 max-w-lg relative hidden md:block">
+            <input type="text" id="search-input" placeholder="ابحث بالذكاء الاصطناعي..." class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-2 rounded-xl focus:outline-none focus:border-indigo-500">
+            <button onclick="performSearch()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition">بحث</button>
         </div>
-     </header>
+
+        <div class="flex items-center gap-4">
+            <a href="track_order.php" class="text-xs bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-700">تتبع الطلب</a>
+            <button onclick="openCheckoutModal()" class="bg-indigo-600 px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2">
+                <i class="fa-solid fa-bag-shopping"></i> السلة <span id="cart-count" class="bg-white text-indigo-950 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+            </button>
+        </div>
+    </div>
+</header>
 
      <main class="container mx-auto px-6 py-10 flex-1">
         <div id="products-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -91,29 +93,7 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
     
 
         <script>
-           let cart = [];
-           function addToCart(id, name, price) { cart.push({id, name, price}); updateCartUI(); alert('تمت الإضافة للسلة!'); }
-           function updateCartUI() {
-            document.getElementById('cart-count').innerText = cart.length;
-            let list = document.getElementById('cart-items-list'), total = 0;
-            list.innerHTML = '';
-            cart.forEach(i => { total += i.price; list.innerHTML += `<div class="flex justify-between py-1"><span>${i.name}</span><span class="text-green-400">$${i.price}</span></div>`; });
-            document.getElementById('cart-total-price').innerText = `$${total.toFixed(2)}`;
-            document.getElementById('cart-data-input').value = JSON.stringify(cart);
-          }
-          function openCheckoutModal() { if(cart.length===0) return alert('السلة فارغة!'); document.getElementById('checkout-modal').classList.remove('hidden'); }
-          function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
-          async function performSmartSearch() {
-            let query = document.getElementById('smart-search-input').value;
-            if(!query) return;
-            let res = await fetch('api/semantic_search.php', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query})});
-            let data = await res.json();
-            let grid = document.getElementById('products-grid');
-            grid.innerHTML = '';
-            data.products.forEach(p => {
-                grid.innerHTML += `<div class="glass rounded-3xl overflow-hidden p-6"><img src="${p.image_url}" class="w-full h-48 object-cover rounded-xl mb-4"><h3 class="text-xl font-bold">${p.name}</h3><p class="text-slate-400 text-sm my-2">${p.description}</p><div class="flex justify-between items-center mt-4"><span class="text-2xl font-black">$${p.price}</span><button onclick="addToCart(${p.id}, '${p.name}', ${p.price})" class="bg-indigo-600 px-4 py-2 rounded-xl text-sm font-bold">إضافة</button></div></div>`;
-            });
-         }
+        <script src="assets/js/app.js"></script>
      </script>
  </body>
 </html>
