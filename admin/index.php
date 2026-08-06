@@ -1,10 +1,5 @@
-<?php
-error_reporting(0);
-ini_set('display_errors', 0);
 
-// المسار الصحيح للوصول لملف الاتصال بقاعدة البيانات من داخل مجلد admin
-require_once dirname(__DIR__) . '/config/db.php';
-
+<?php require_once '../config/db.php'; ?>
 // باقي كود لوحة التحكم...
 
 $totalSales  = $pdo->query("SELECT SUM(total_amount) FROM orders WHERE status != 'pending'")->fetchColumn() ?: 0;
