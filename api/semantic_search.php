@@ -15,9 +15,7 @@ try {
         exit; 
     }
 
-    $apiKey = $_ENV['GEMINI_API_KEY'] ?? $_SERVER['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? '';
-
-    // جلب جميع منتجات الجدول لتفادي خطأ أسماء الأعمدة غير الموجودة
+    // جلب جميع المنتجات من قاعدة البيانات
     $stmt = $pdo->query("SELECT * FROM products");
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -26,24 +24,37 @@ try {
         exit;
     }
 
-    // إذا لم يتوفر مفتاح API نستخدم البحث التقليدي
+    $apiKey = $_ENV['GEMINI_API_KEY'] ?? $_SERVER['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? '';
+
+    // إذا لم يتوفر مفتاح API نرجع كل المنتجات أو ننفذ بحث تقليدي
     if (empty($apiKey) || $apiKey === "YOUR_GEMINI_API_KEY") {
         $stmtS = $pdo->prepare("SELECT * FROM products WHERE name LIKE ? OR description LIKE ?");
         $stmtS->execute(["%$query%", "%$query%"]);
-        echo json_encode(['products' => $stmtS->fetchAll(PDO::FETCH_ASSOC)]);
+        $resProducts = $stmtS->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(['products' => !empty($resProducts) ? $resProducts : $products]);
         exit;
     }
 
     $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
-    $prompt = "لدينا قائمة بالمنتجات التالية بصيغة JSON:\n" . json_encode($products, JSON_UNESCAPED_UNICODE) . "\n\nالمستخدم يبحث عن: '{$query}'.\nاختر المنتجات المناسبة وأرجع أرقام الـ ID الخاصة بها فقط مفصولة بأرقام مثل: 1, 2, 3. إذا لم تجد أي منتج أرجع الرقم 0 فقط.";
+    
+    // إعداد الوصف وإرشاد النموذج لإرجاع IDs فقط
+    $prompt = "You are a search assistant for an e-commerce store. Here is the JSON list of available products:\n" 
+            . json_encode($products, JSON_UNESCAPED_UNICODE) 
+            . "\n\nThe user is searching for: '{$query}'. "
+            . "Return ONLY the matching product IDs as a comma-separated list of numbers (e.g., 1, 2, 3). If no products match, return '0'.";
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => json_encode(["contents" => [["parts" => [["text" => $prompt]]]]]),
+        CURLOPT_POSTFIELDS => json_encode([
+            "contents" => [
+                ["parts" => [["text" => $prompt]]]
+            ]
+        ]),
         CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-        CURLOPT_SSL_VERIFYPEER => false
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_TIMEOUT => 10
     ]);
     $res = curl_exec($ch); 
     curl_close($ch);
@@ -51,10 +62,11 @@ try {
     $data = json_decode($res, true);
     $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
     
+    // استخراج كافة الأرقام من استجابة الذكاء الاصطناعي
     preg_match_all('/\d+/', $text, $matches);
-    $ids = array_filter(array_map('intval', $matches[0] ?? []), function($id) {
+    $ids = array_unique(array_filter(array_map('intval', $matches[0] ?? []), function($id) {
         return $id > 0;
-    });
+    }));
 
     if (!empty($ids)) {
         $in = implode(',', array_fill(0, count($ids), '?'));
@@ -62,10 +74,8 @@ try {
         $st->execute(array_values($ids));
         echo json_encode(['products' => $st->fetchAll(PDO::FETCH_ASSOC)]);
     } else {
-        // Fallback للبحث العادي إذا لم يُرجع AI ناتجة
-        $stmtS = $pdo->prepare("SELECT * FROM products WHERE name LIKE ? OR description LIKE ?");
-        $stmtS->execute(["%$query%", "%$query%"]);
-        echo json_encode(['products' => $stmtS->fetchAll(PDO::FETCH_ASSOC)]);
+        // في حال عدم العثور على مطابقة محددة بالذكاء الاصطناعي، يتم إرجاع المنتجات العامة كحل احتياطي
+        echo json_encode(['products' => $products]);
     }
 
 } catch (Exception $e) {
