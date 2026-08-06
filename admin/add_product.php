@@ -1,4 +1,4 @@
-<?php require_once '../config/db.php'; ?>
+<?php require_once __DIR__ . '/../config/db.php'; ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>

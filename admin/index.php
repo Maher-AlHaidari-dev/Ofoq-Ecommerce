@@ -1,5 +1,5 @@
 
-<?php require_once '../config/db.php'; ?>
+<?php require_once __DIR__ . '/../config/db.php'; ?>
 // باقي كود لوحة التحكم...
 
 $totalSales  = $pdo->query("SELECT SUM(total_amount) FROM orders WHERE status != 'pending'")->fetchColumn() ?: 0;
