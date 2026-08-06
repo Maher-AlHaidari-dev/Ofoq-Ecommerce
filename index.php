@@ -93,7 +93,89 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
     
 
         <script>
-        <script src="assets/js/app.js"></script>
-     </script>
- </body>
+// إعداد كائن السلة
+let cart = [];
+
+// دالة إضافة المنتج للسلة
+function addToCart(id, name, price) {
+    cart.push({ id, name, price });
+    updateCartUI();
+    alert('تمت إضافة المنتج للسلة بنجاح!');
+}
+
+// دالة تحديث واجهة السلة
+function updateCartUI() {
+    const cartCountEl = document.getElementById('cart-count');
+    if (cartCountEl) cartCountEl.innerText = cart.length;
+
+    const list = document.getElementById('cart-items-list');
+    const totalEl = document.getElementById('cart-total-price');
+    const cartDataInput = document.getElementById('cart-data-input');
+
+    let total = 0;
+    if (list) {
+        list.innerHTML = '';
+        cart.forEach(i => {
+            total += Number(i.price);
+            list.innerHTML += `<div class="flex justify-between py-1"><span>${i.name}</span><span class="text-green-400">$${i.price}</span></div>`;
+        });
+    }
+
+    if (totalEl) totalEl.innerText = `$${total.toFixed(2)}`;
+    if (cartDataInput) cartDataInput.value = JSON.stringify(cart);
+}
+
+// دالة فتح نافذة الدفع
+function openCheckoutModal() {
+    if (cart.length === 0) return alert('السلة فارغة!');
+    const modal = document.getElementById('checkout-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+// دالة إغلاق نافذة الدفع
+function closeCheckoutModal() {
+    const modal = document.getElementById('checkout-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// دالة البحث الذكي
+async function performSmartSearch() {
+    const searchInput = document.getElementById('smart-search-input');
+    if (!searchInput) return;
+    
+    const query = searchInput.value;
+    if (!query) return;
+
+    try {
+        const res = await fetch('api/semantic_search.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
+        const data = await res.json();
+        const grid = document.getElementById('products-grid');
+
+        if (grid && data.products) {
+            grid.innerHTML = '';
+            data.products.forEach(p => {
+                grid.innerHTML += `
+                    <div class="glass rounded-3xl overflow-hidden p-6 flex flex-col justify-between">
+                        <img src="${p.image_url}" class="w-full h-48 object-cover rounded-xl mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">${p.name}</h3>
+                            <p class="text-slate-400 text-sm mb-4">${p.description || ''}</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-bold">$${p.price}</span>
+                            <button onclick="addToCart(${p.id}, '${p.name}', ${p.price})" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl">إضافة للسلة</button>
+                        </div>
+                    </div>`;
+            });
+        }
+    } catch (err) {
+        console.error('Error in search:', err);
+    }
+}
+</script>
+</body>
 </html>
