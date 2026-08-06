@@ -136,6 +136,7 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
         const searchInput = document.getElementById('smart-search-input');
         if (!searchInput) return;
         
+    
         const query = searchInput.value;
         if (!query) return;
 
