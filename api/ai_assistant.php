@@ -1,51 +1,34 @@
-<?php
-header('Content-Type: application/json');
-require_once '../config/db.php';
+async function sendAIMessage() {
+    const input = document.getElementById('ai-input');
+    const message = input.value.trim();
+    if (!message) return;
 
-$data = json_decode(file_get_contents('php://input'), true);
-$userMessage = $data['message'] ?? '';
+    const chatMessages = document.getElementById('chat-messages');
 
-if (empty($userMessage)) {
-    echo json_encode(['reply' => 'يرجى كتابة استفسارك.']);
-    exit;
+    // عرض رسالة المستخدم
+    chatMessages.innerHTML += `<div class="bg-indigo-600 text-white p-3 rounded-lg max-w-[85%] ml-auto text-right mb-2">${message}</div>`;
+    input.value = '';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // حالة التحميل
+    const loadingId = 'loading-' + Date.now();
+    chatMessages.innerHTML += `<div id="${loadingId}" class="bg-slate-700 text-slate-200 p-3 rounded-lg max-w-[85%] mb-2">جاري التفكير...</div>`;
+
+    try {
+        const response = await fetch('api/ai_assistant.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // إرسال سلة المشتريات الحالية والرسالة
+            body: JSON.stringify({ 
+                message: message,
+                cart: cart 
+            })
+        });
+        const data = await response.json();
+        
+        document.getElementById(loadingId).innerText = data.reply || data.error;
+    } catch (e) {
+        document.getElementById(loadingId).innerText = "حدث خطأ في الاتصال بالخادم.";
+    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
-// 1. جلب قائمة المنتجات المتاحة لإعطائها كـ Context للذكاء الاصطناعي
-$stmt = $pdo->query("SELECT name, price, description FROM products");
-$products = $stmt->fetchAll();
-
-$context = "قائمة المنتجات المتاحة في المتجر حالياً:\n";
-foreach ($products as $p) {
-    $context .= "- {$p['name']}: بسعر \${$p['price']} ({$p['description']})\n";
-}
-
-// 2. إعداد الـ Prompt
-$apiKey = getenv('GEMINI_API_KEY') ?: "YOUR_GEMINI_API_KEY";
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
-
-$systemPrompt = "أنت مساعد ذكي لمتجر 'أُفُق'. استعن بالمعلومات التالية للرد على العميل باللغة العربية بأسلوب احترافي:\n" . $context;
-
-$postData = [
-    "contents" => [
-        [
-            "parts" => [
-                ["text" => $systemPrompt . "\nسؤال العميل: " . $userMessage]
-            ]
-        ]
-    ]
-];
-
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-$response = curl_exec($ch);
-curl_close($ch);
-
-$responseData = json_decode($response, true);
-$aiReply = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? "عذراً، حدث خطأ أثناء معالجة الطلب.";
-
-echo json_encode(['reply' => $aiReply]);
-?>
