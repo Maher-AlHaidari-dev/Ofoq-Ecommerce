@@ -35,7 +35,7 @@ try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 
 } catch (PDOException $e) {
-    error_log("Database Connection Error: " . $e->getMessage());
-    die("خطأ في الاتصال بقاعدة البيانات.");
+    // تعديل هذا السطر ليطبع الخطأ الحقيقي على الشاشة مباشرة
+    die("خطأ الاتصال الفعلي: " . $e->getMessage());
 }
 ?>
