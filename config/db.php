@@ -1,4 +1,25 @@
 <?php
+<?php
+ob_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    /*
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    */
+    session_start();
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// باقي الكود كما هو تماماً (تحميل البيئة والاتصال بقاعدة البيانات)...
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
