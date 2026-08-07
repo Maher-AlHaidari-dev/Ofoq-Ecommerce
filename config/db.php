@@ -6,8 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-// تحميل ملف .env محلياً إذا كان موجوّداً
+// 
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
     if (class_exists('Dotenv\Dotenv')) {
