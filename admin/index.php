@@ -1,9 +1,5 @@
 
 <?php 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 require_once __DIR__ . '/../config/db.php'; 
 // باقي كود لوحة التحكم...
 
@@ -18,7 +14,8 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
     <meta charset="UTF-8">
     <title>لوحة التحكم المتكاملة - أُفُق</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
     <style> body { font-family: 'Tajawal', sans-serif; } </style>
 </head>
