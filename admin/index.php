@@ -1,8 +1,7 @@
-
 <?php 
 require_once __DIR__ . '/../config/db.php';
-// باقي كود لوحة التحكم...
 
+// استعلامات لوحة التحكم
 $totalSales = $pdo->query("SELECT SUM(total_amount) FROM orders WHERE status != 'pending'")->fetchColumn() ?: 0;
 $totalOrders = $pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $orders = $pdo->query("SELECT * FROM orders ORDER BY created_at DESC")->fetchAll();
@@ -12,9 +11,9 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم المتكاملة - أُفُق</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
     <style> body { font-family: 'Tajawal', sans-serif; } </style>
@@ -131,9 +130,11 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
 
         <!-- 🛒 قسم إدارة الطلبات الواردة -->
         <section id="orders-section" class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-cart-flatbed text-indigo-400"></i> قائمة الطلبات الواردة
-            </h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-cart-flatbed text-indigo-400"></i> قائمة الطلبات الواردة
+                </h2>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead>
@@ -147,15 +148,20 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
                         </tr>
                     </thead>
                     <tbody>
+                        <?php if (empty($orders)): ?>
+                            <tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد طلبات حالياً.</td></tr>
+                        <?php endif; ?>
+
                         <?php foreach ($orders as $o): ?>
                         <tr class="border-b border-slate-700/50">
-                            <td class="p-3 font-mono text-indigo-300"><?= $o['tracking_code'] ?></td>
+                            <td class="p-3 font-mono text-indigo-300"><?= htmlspecialchars($o['tracking_code']) ?></td>
                             <td class="p-3"><?= htmlspecialchars($o['customer_name']) ?></td>
                             <td class="p-3 font-mono text-xs text-slate-400"><?= htmlspecialchars($o['customer_phone']) ?></td>
-                            <td class="p-3 text-green-400 font-bold">$<?= $o['total_amount'] ?></td>
+                            <td class="p-3 text-green-400 font-bold">$<?= number_format($o['total_amount'], 2) ?></td>
                             <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs bg-indigo-500/20 text-indigo-300"><?= strtoupper($o['status']) ?></span></td>
                             <td class="p-3">
                                 <form action="update_status.php" method="POST" class="flex gap-2">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                     <input type="hidden" name="order_id" value="<?= $o['id'] ?>">
                                     <select name="status" class="bg-slate-900 border border-slate-700 text-xs rounded-lg p-1.5 text-white">
                                         <option value="pending" <?= $o['status']=='pending'?'selected':'' ?>>Pending</option>
