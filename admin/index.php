@@ -1,8 +1,7 @@
 
-<?php 
-require_once __DIR__ . '/../config/db.php'; 
+<?php require_once __DIR__ . '/../config/db.php';?>
 // باقي كود لوحة التحكم...
-
+<?php
 $totalSales = $pdo->query("SELECT SUM(total_amount) FROM orders WHERE status != 'pending'")->fetchColumn() ?: 0;
 $totalOrders = $pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $orders = $pdo->query("SELECT * FROM orders ORDER BY created_at DESC")->fetchAll();
