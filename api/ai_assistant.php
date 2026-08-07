@@ -1,3 +1,4 @@
+<?php
 async function sendAIMessage() {
     const input = document.getElementById('ai-input');
     const message = input.value.trim();
@@ -32,3 +33,4 @@ async function sendAIMessage() {
     }
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+?>

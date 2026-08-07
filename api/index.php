@@ -12,3 +12,4 @@ if ($request == '/' || $request == '') {
         require __DIR__ . '/../index.php';
     }
 }
+?>

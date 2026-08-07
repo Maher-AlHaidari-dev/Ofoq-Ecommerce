@@ -58,7 +58,7 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
             <div id="cart-items-list" class="max-h-40 overflow-y-auto mb-4 border-y border-slate-800 py-3 text-sm"></div>
             <div class="flex justify-between font-bold text-xl mb-6"><span>الإجمالي:</span><span id="cart-total-price" class="text-green-400">$0.00</span></div>
             <form action="checkout.php" method="POST" class="space-y-4">
-                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                <input type="hidden" name="csrf_token" value="<?php= $_SESSION['csrf_token'] ?? '' ?>">
                 <input type="hidden" name="cart_data" id="cart-data-input">
                 <input type="text" name="customer_name" required placeholder="اسم العميل الكامل" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500">
                 <input type="tel" name="customer_phone" required placeholder="رقم الهاتف" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500">
