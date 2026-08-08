@@ -19,7 +19,6 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
     <style> body { font-family: 'Tajawal', sans-serif; } </style>
 </head>
 <body class="bg-slate-900 text-slate-100 flex min-h-screen">
-
     <!-- القائمة الجانبية Sidebar -->
     <aside class="w-64 bg-slate-950 p-6 border-r border-slate-800 flex flex-col justify-between">
         <div>
