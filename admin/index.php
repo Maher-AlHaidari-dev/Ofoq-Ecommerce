@@ -1,12 +1,15 @@
-<?php 
+<?php
 require_once __DIR__ . '/../config/db.php';
 
 // استعلامات لوحة التحكم
 $totalSales = $pdo->query("SELECT SUM(total_amount) FROM orders WHERE status != 'pending'")->fetchColumn() ?: 0;
 $totalOrders = $pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $orders = $pdo->query("SELECT * FROM orders ORDER BY created_at DESC")->fetchAll();
-$products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
+$products = $pdo->query("SELECT * FROM orders ORDER BY id DESC")->fetchAll();
 ?>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
