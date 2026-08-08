@@ -1,13 +1,12 @@
 <?php
+ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-// تحميل ملف .env محلياً إذا كان موجوّداً
+// 
 if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
     if (class_exists('Dotenv\Dotenv')) {
@@ -35,7 +34,7 @@ try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 
 } catch (PDOException $e) {
-    error_log("Database Connection Error: " . $e->getMessage());
-    die("خطأ في الاتصال بقاعدة البيانات.");
+    // تعديل هذا السطر ليطبع الخطأ الحقيقي على الشاشة مباشرة
+    die("خطأ الاتصال الفعلي: " . $e->getMessage());
 }
 ?>
