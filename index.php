@@ -42,7 +42,7 @@ $images = array_filter($images);
 $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
 ?>
 
-<div class="product-gallery">
+< class="product-gallery">
     <!-- الصورة الرئيسية -->
     <img id="mainImg_<?= $p['id'] ?>" 
          src="<?= htmlspecialchars($mainImage) ?>" 
@@ -50,14 +50,14 @@ $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
 
     <!-- صور الخيارات والألوان (تظهر فقط إذا وُجدت أكثر من صورة) -->
     <?php if (count($images) > 1): ?>
-        <div class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
+       <div class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
             <?php foreach ($images as $index => $imgUrl): ?>
-                <img src="<?= htmlspecialchars($imgUrl) ?>" 
-                     onclick="changeProductImg('mainImg_<?= $p['id'] %>', '<?= htmlspecialchars($imgUrl) ?>', this)" 
-                     class="color-thumb-<?= $p['id'] ?> w-8 h-8 rounded-md border-2 <?= $index === 0 ? 'border-indigo-500' : 'border-transparent' ?> hover:border-indigo-400 cursor-pointer object-cover transition-all"
-                     alt="خيار اللون">
-            <?php endforeach; ?>
-        </div>
+             <img src="<?= htmlspecialchars($imgUrl) ?>" 
+             onclick="changeProductImg('mainImg_<?= $p['id'] %>', '<?= htmlspecialchars($imgUrl) %>', this)" 
+             class="color-thumb-<?= $p['id'] ?> w-8 h-8 rounded-md border-2 <?= $index === 0 ? 'border-indigo-500' : 'border-transparent' ?> hover:border-indigo-400 cursor-pointer object-cover transition-all" 
+             alt="خيار اللون">
+              <?php endforeach; ?>
+         </div>
     <?php endif; ?>
 </div>
                         <div class="p-6">
