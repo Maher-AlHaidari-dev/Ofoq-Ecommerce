@@ -33,45 +33,46 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
     <main class="container mx-auto px-6 py-10 flex-1">
         <div id="products-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <?php foreach ($products as $p): ?>
+                <?php
+                // تحضير روابط الصور من حقل image_url
+                $images = array_map('trim', explode(',', $p['image_url'] ?? ''));
+                $images = array_filter($images);
+                $mainImage = !empty($images) ? reset($images) : 'assets/images/default.jpg';
+                ?>
                 <div class="glass rounded-3xl overflow-hidden flex flex-col justify-between">
-                    <>
-                               <?php
-// تحضير روابط الصور من حقل image_url
-$images = array_map('trim', explode(',', $p['image_url'] ?? ''));
-$images = array_filter($images);
-$mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
-?>
+                    <div>
+                        <!-- معرض الصور -->
+                        <div class="product-gallery">
+                            <!-- الصورة الرئيسية -->
+                            <img id="mainImg_<?php echo $p['id']; ?>" 
+                                 src="<?php echo htmlspecialchars($mainImage); ?>" 
+                                 class="w-full h-48 object-cover transition-all duration-300">
 
-<div class="product-gallery">
-    <!-- الصورة الرئيسية -->
-    <img id="mainImg_<?php echo $p['id']; ?>" 
-         src="<?php echo htmlspecialchars($mainImage); ?>" 
-         class="w-full h-48 object-cover transition-all duration-300">
+                            <!-- صور الخيارات والألوان -->
+                            <?php if (count($images) > 1): ?>
+                                <div class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
+                                    <?php foreach ($images as $index => $imgUrl): ?>
+                                        <img src="<?php echo htmlspecialchars($imgUrl); ?>" 
+                                             onclick="changeProductImg('mainImg_<?php echo $p['id']; ?>', '<?php echo htmlspecialchars($imgUrl); ?>', this)" 
+                                             class="color-thumb-<?php echo $p['id']; ?> w-8 h-8 rounded-md border-2 <?php echo $index === 0 ? 'border-indigo-500' : 'border-transparent'; ?> hover:border-indigo-400 cursor-pointer object-cover transition-all" 
+                                             alt="خيار اللون">
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
 
-    <!-- صور الخيارات والألوان -->
-    <?php if (count($images) > 1): ?>
-        <div class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
-            <?php foreach ($images as $index => $imgUrl): ?>
-                <img src="<?php echo htmlspecialchars($imgUrl); ?>" 
-                     onclick="changeProductImg('mainImg_<?php echo $p['id']; ?>', '<?php echo htmlspecialchars($imgUrl); ?>', this)" 
-                     class="color-thumb-<?php echo $p['id']; ?> w-8 h-8 rounded-md border-2 <?php echo $index === 0 ? 'border-indigo-500' : 'border-transparent'; ?> hover:border-indigo-400 cursor-pointer object-cover transition-all" 
-                     alt="خيار اللون">
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-</div>
-
-    
-    
+                        <!-- تفاصيل المنتج -->
                         <div class="p-6">
-                            <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full"><?= htmlspecialchars($p['category']) ?></span>
-                            <h3 class="text-xl font-bold mt-3"><?= htmlspecialchars($p['name']) ?></h3>
-                            <p class="text-slate-400 text-sm mt-2"><?= htmlspecialchars($p['description']) ?></p>
+                            <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full"><?php echo htmlspecialchars($p['category']); ?></span>
+                            <h3 class="text-xl font-bold mt-3"><?php echo htmlspecialchars($p['name']); ?></h3>
+                            <p class="text-slate-400 text-sm mt-2"><?php echo htmlspecialchars($p['description']); ?></p>
                         </div>
                     </div>
+
+                    <!-- السعر وزر الإضافة -->
                     <div class="p-6 pt-0 flex justify-between items-center border-t border-slate-800 mt-4">
-                        <span class="text-2xl font-black">$<?= number_format($p['price'], 2) ?></span>
-                        <button onclick="addToCart(<?= $p['id'] ?>, '<?= htmlspecialchars($p['name'], ENT_QUOTES) ?>', <?= $p['price'] ?>)" class="bg-indigo-600 px-4 py-2 rounded-xl text-sm font-bold">إضافة للسلة</button>
+                        <span class="text-2xl font-black">$<?php echo number_format($p['price'], 2); ?></span>
+                        <button onclick="addToCart(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?>', <?php echo $p['price']; ?>)" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-bold transition-all">إضافة للسلة</button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -85,7 +86,7 @@ $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
             <div id="cart-items-list" class="max-h-40 overflow-y-auto mb-4 border-y border-slate-800 py-3 text-sm"></div>
             <div class="flex justify-between font-bold text-xl mb-6"><span>الإجمالي:</span><span id="cart-total-price" class="text-green-400">$0.00</span></div>
             <form action="checkout.php" method="POST" class="space-y-4">
-                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
                 <input type="hidden" name="cart_data" id="cart-data-input">
                 <input type="text" name="customer_name" required placeholder="اسم العميل الكامل" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500">
                 <input type="tel" name="customer_phone" required placeholder="رقم الهاتف" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500">
@@ -99,7 +100,7 @@ $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
         <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
                 <h4 class="text-lg font-bold text-white mb-3">عن متجر أُفُق</h4>
-                <p class="text-xs text-indigo-300 leading-relaxed">منصة تسوق إلكترونية مدعومة بالذكاء الاصطناعي وبوابات الدفع التفاعلية من تطوير فريق TikiTaka-Devs.</p>
+                <p class="text-xs text-indigo-300 leading-relaxed">منصة تسوق إلكترونية للتصميم والطباعة الرقمية وإدارة الطلبات بمرونة عاليّة.</p>
             </div>
             <div>
                 <h4 class="text-lg font-bold text-white mb-3">خدمات العملاء</h4>
@@ -163,7 +164,6 @@ $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
         const searchInput = document.getElementById('smart-search-input');
         if (!searchInput) return;
         
-    
         const query = searchInput.value;
         if (!query) return;
 
@@ -197,22 +197,19 @@ $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
             console.error('Error in search:', err);
         }
     }
-    <>
-function changeProductImg(mainImgId, newSrc, element) {
-    document.getElementById(mainImgId).src = newSrc;
-    
-    // إزالة التحديد عن باقي الخيارات لنفس المنتج
-    const container = element.parentElement;
-    container.querySelectorAll('img').forEach(img => {
-        img.classList.remove('border-indigo-500');
-        img.classList.add('border-transparent');
-    });
-    
-    // إضافة الإطار الملون على الخيار المختار
-    element.classList.remove('border-transparent');
-    element.classList.add('border-indigo-500');
-}
 
+    function changeProductImg(mainImgId, newSrc, element) {
+        document.getElementById(mainImgId).src = newSrc;
+        
+        const container = element.parentElement;
+        container.querySelectorAll('img').forEach(img => {
+            img.classList.remove('border-indigo-500');
+            img.classList.add('border-transparent');
+        });
+        
+        element.classList.remove('border-transparent');
+        element.classList.add('border-indigo-500');
+    }
     </script>
 </body>
 </html>
