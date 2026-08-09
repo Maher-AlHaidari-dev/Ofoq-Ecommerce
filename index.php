@@ -194,7 +194,7 @@ $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
             console.error('Error in search:', err);
         }
     }
-    <script>
+    <>
 function changeProductImg(mainImgId, newSrc, element) {
     document.getElementById(mainImgId).src = newSrc;
     
@@ -209,7 +209,7 @@ function changeProductImg(mainImgId, newSrc, element) {
     element.classList.remove('border-transparent');
     element.classList.add('border-indigo-500');
 }
-</script>
+
     </script>
 </body>
 </html>
