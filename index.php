@@ -35,7 +35,31 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
             <?php foreach ($products as $p): ?>
                 <div class="glass rounded-3xl overflow-hidden flex flex-col justify-between">
                     <div>
-                        <img src="<?= htmlspecialchars($p['image_url']) ?>" class="w-full h-48 object-cover">
+                               <?php
+// تحضير روابط الصور من حقل image_url
+$images = array_map('trim', explode(',', $p['image_url'] ?? ''));
+$images = array_filter($images);
+$mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
+?>
+
+<div class="product-gallery">
+    <!-- الصورة الرئيسية -->
+    <img id="mainImg_<?= $p['id'] ?>" 
+         src="<?= htmlspecialchars($mainImage) ?>" 
+         class="w-full h-48 object-cover transition-all duration-300">
+
+    <!-- صور الخيارات والألوان (تظهر فقط إذا وُجدت أكثر من صورة) -->
+    <?php if (count($images) > 1): ?>
+        <div class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
+            <?php foreach ($images as $index => $imgUrl): ?>
+                <img src="<?= htmlspecialchars($imgUrl) ?>" 
+                     onclick="changeProductImg('mainImg_<?= $p['id'] %>', '<?= htmlspecialchars($imgUrl) ?>', this)" 
+                     class="color-thumb-<?= $p['id'] ?> w-8 h-8 rounded-md border-2 <?= $index === 0 ? 'border-indigo-500' : 'border-transparent' ?> hover:border-indigo-400 cursor-pointer object-cover transition-all"
+                     alt="خيار اللون">
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>
                         <div class="p-6">
                             <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full"><?= htmlspecialchars($p['category']) ?></span>
                             <h3 class="text-xl font-bold mt-3"><?= htmlspecialchars($p['name']) ?></h3>
@@ -170,6 +194,22 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
             console.error('Error in search:', err);
         }
     }
+    <script>
+function changeProductImg(mainImgId, newSrc, element) {
+    document.getElementById(mainImgId).src = newSrc;
+    
+    // إزالة التحديد عن باقي الخيارات لنفس المنتج
+    const container = element.parentElement;
+    container.querySelectorAll('img').forEach(img => {
+        img.classList.remove('border-indigo-500');
+        img.classList.add('border-transparent');
+    });
+    
+    // إضافة الإطار الملون على الخيار المختار
+    element.classList.remove('border-transparent');
+    element.classList.add('border-indigo-500');
+}
+</script>
     </script>
 </body>
 </html>
