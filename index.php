@@ -50,7 +50,7 @@ $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
 
     <!-- صور الخيارات والألوان (تظهر فقط إذا وُجدت أكثر من صورة) -->
     <?php if (count($images) > 1): ?>
-       <div class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
+       < class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
             <?php foreach ($images as $index => $imgUrl): ?>
              <img src="<?= htmlspecialchars($imgUrl) ?>" 
              onclick="changeProductImg('mainImg_<?= $p['id'] %>', '<?= htmlspecialchars($imgUrl) %>', this)" 
