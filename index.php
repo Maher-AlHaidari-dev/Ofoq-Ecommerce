@@ -34,7 +34,7 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
         <div id="products-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <?php foreach ($products as $p): ?>
                 <div class="glass rounded-3xl overflow-hidden flex flex-col justify-between">
-                    <div>
+                    <>
                                <?php
 // تحضير روابط الصور من حقل image_url
 $images = array_map('trim', explode(',', $p['image_url'] ?? ''));
@@ -42,24 +42,27 @@ $images = array_filter($images);
 $mainImage = !empty($images) ? $images[0] : 'assets/images/default.jpg';
 ?>
 
-< class="product-gallery">
+<div class="product-gallery">
     <!-- الصورة الرئيسية -->
-    <img id="mainImg_<?= $p['id'] ?>" 
-         src="<?= htmlspecialchars($mainImage) ?>" 
+    <img id="mainImg_<?php echo $p['id']; ?>" 
+         src="<?php echo htmlspecialchars($mainImage); ?>" 
          class="w-full h-48 object-cover transition-all duration-300">
 
-    <!-- صور الخيارات والألوان (تظهر فقط إذا وُجدت أكثر من صورة) -->
+    <!-- صور الخيارات والألوان -->
     <?php if (count($images) > 1): ?>
-       < class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
+        <div class="flex justify-center gap-1 p-2 bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
             <?php foreach ($images as $index => $imgUrl): ?>
-             <img src="<?= htmlspecialchars($imgUrl) ?>" 
-             onclick="changeProductImg('mainImg_<?= $p['id'] %>', '<?= htmlspecialchars($imgUrl) %>', this)" 
-             class="color-thumb-<?= $p['id'] ?> w-8 h-8 rounded-md border-2 <?= $index === 0 ? 'border-indigo-500' : 'border-transparent' ?> hover:border-indigo-400 cursor-pointer object-cover transition-all" 
-             alt="خيار اللون">
-              <?php endforeach; ?>
-         </div>
+                <img src="<?php echo htmlspecialchars($imgUrl); ?>" 
+                     onclick="changeProductImg('mainImg_<?php echo $p['id']; ?>', '<?php echo htmlspecialchars($imgUrl); ?>', this)" 
+                     class="color-thumb-<?php echo $p['id']; ?> w-8 h-8 rounded-md border-2 <?php echo $index === 0 ? 'border-indigo-500' : 'border-transparent'; ?> hover:border-indigo-400 cursor-pointer object-cover transition-all" 
+                     alt="خيار اللون">
+            <?php endforeach; ?>
+        </div>
     <?php endif; ?>
 </div>
+
+    
+    
                         <div class="p-6">
                             <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full"><?= htmlspecialchars($p['category']) ?></span>
                             <h3 class="text-xl font-bold mt-3"><?= htmlspecialchars($p['name']) ?></h3>
