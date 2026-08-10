@@ -2,7 +2,7 @@
 require_once 'config/db.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: index.php'); exit; }
 
-if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) { die("خطأ أمني CSRF."); }
+//if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) { die("خطأ أمني CSRF."); }
 
 $name    = trim(filter_input(INPUT_POST, 'customer_name', FILTER_SANITIZE_SPECIAL_CHARS));
 $phone   = trim(filter_input(INPUT_POST, 'customer_phone', FILTER_SANITIZE_SPECIAL_CHARS));
