@@ -100,7 +100,7 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
         <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
                 <h4 class="text-lg font-bold text-white mb-3">عن متجر أُفُق</h4>
-                <p class="text-xs text-indigo-300 leading-relaxed">منصة تسوق إلكترونية للتصميم والطباعة الرقمية وإدارة الطلبات بمرونة عاليّة.</p>
+                <p class="text-xs text-indigo-300 leading-relaxed">منصة تسوق إلكترونية  وإدارة الطلبات بمرونة عاليّة.</p>
             </div>
             <div>
                 <h4 class="text-lg font-bold text-white mb-3">خدمات العملاء</h4>
