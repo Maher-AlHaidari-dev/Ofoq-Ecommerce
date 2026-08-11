@@ -114,7 +114,7 @@ $products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
                 <a href="admin/index.php" target="_blank" class="inline-block text-xs bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 px-3 py-1.5 rounded-lg transition">
                     <i class="fa-solid fa-lock ml-1"></i> دخول لوحة التحكم (للإدارة فقط)
                 </a>
-                <p class="text-xs text-indigo-400 mt-4">© 2026 TikiTaka-Devs. جميع الحقوق محفوظة.</p>
+                <p class="text-xs text-indigo-400 mt-4">© 2026 Maher-alhaidari-dev. جميع الحقوق محفوظة.</p>
             </div>
         </div>
     </footer>
